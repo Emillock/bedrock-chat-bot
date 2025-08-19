@@ -48,20 +48,6 @@ def main():
     if user_text is None:  # nothing submitted yet
         st.stop()
     
-    params = st.session_state.get('params')
-    if not (
-        params.get('api_key') or
-        (   params.get('model_id') == 'Bedrock' and
-            params.get('region_name') and
-            params.get('aws_access_key') and
-            params.get('aws_secret_key')
-        )
-    ):
-        err_mesg = "❌ Missing credentials: provide either an API key or complete AWS credentials."
-        _append_message_to_session({"role": "assistant", "content": err_mesg})
-        with messages_container.chat_message("assistant"):
-            st.markdown(err_mesg)
-        st.rerun()
 
 # ------------------------------------------------------------------ handle question (if any text)
     if user_text:

@@ -40,44 +40,11 @@ def health() -> Dict[str, Any]:
     return {"status": "healthy", "utc_time": utc_time, "baku_time": baku_time}
 
 
-@app.post("/predict")
-async def predict(file: UploadFile = File(...)) -> Dict[str, Any]:
+@app.post("/generate")
+async def generate(prompt: str, modelName: str) -> Dict[str, Any]:
     start_time = datetime.now()
     try:
-        # Validate file type
-        suffix = Path(file.filename).suffix.lower()
-        if suffix not in {".csv", ".xlsx", ".xls", ".parquet"}:
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid file format. Please upload CSV or Excel files only.",
-            )
-
-        # Read file content (async!)
-        file_content = await file.read()
-        if not file_content:
-            raise HTTPException(status_code=400, detail="Uploaded file is empty")
-
-        logger.info(f"Processing file: {file.filename} ({len(file_content)} bytes)")
-
-        # Generate predictions
-        predictions_list = predict_main(file_content, filename=file.filename)
-
-        # Ensure JSON-serializable (handles numpy arrays/Series)
-        try:
-            predictions_list = list(predictions_list)
-        except TypeError:
-            predictions_list = [p for p in predictions_list]
-
-        processing_time = (datetime.now() - start_time).total_seconds()
-        return {
-            "status": "success",
-            "message": "Predictions generated successfully",
-            "data": {
-                "predictions": predictions_list,
-                "num_predictions": len(predictions_list),
-                "processing_time_seconds": round(processing_time, 3),
-            },
-        }
+        print(f"Received prompt: {prompt} for model: {modelName}")
 
     except HTTPException:
         # pass through expected client errors
