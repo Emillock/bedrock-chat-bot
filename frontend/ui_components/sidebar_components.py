@@ -60,28 +60,13 @@ def create_provider_select_widget():
     default_index = list(MODEL_OPTIONS.keys()).index(default_provider)
     # Provider selector with synced state
     selected_provider = st.sidebar.selectbox(
-        '🔎 Choose Provider',
+        '🔎 Choose Model',
         options=list(MODEL_OPTIONS.keys()),
         index=default_index,
         key="provider_selection",
         on_change=reset_connection_state
     )
-    # Save new provider and its index
-    if selected_provider:
-        params['model_id'] = selected_provider
-        params['provider_index'] = list(MODEL_OPTIONS.keys()).index(selected_provider)
-        st.sidebar.success(f"Model: {MODEL_OPTIONS[selected_provider]}")
 
-    # Dynamic input fields based on provider
-    with st.sidebar.container():
-        if selected_provider == "Bedrock":
-            with st.expander("🔐 Bedrock Credentials", expanded=True):
-                params['region_name'] = st.text_input("AWS Region", value=params.get('region_name'),key="region_name")
-                params['aws_access_key'] = st.text_input("AWS Access Key", value=params.get('aws_access_key'), type="password", key="aws_access_key")
-                params['aws_secret_key'] = st.text_input("AWS Secret Key", value=params.get('aws_secret_key'), type="password", key="aws_secret_key")
-        else:
-            with st.expander("🔐 API Key", expanded=True):
-                params['api_key'] = st.text_input(f"{selected_provider} API Key", value=params.get('api_key'), type="password", key="api_key")
     
 
 def create_advanced_configuration_widget():

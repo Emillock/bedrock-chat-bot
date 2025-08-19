@@ -1,8 +1,10 @@
+import json
 import logging
 import traceback
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict
+from pydantic import BaseModel
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,6 +34,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class Data(BaseModel):
+    prompt: str
+    modelName: str
 
 @app.get("/health")
 def health() -> Dict[str, Any]:
@@ -41,10 +46,12 @@ def health() -> Dict[str, Any]:
 
 
 @app.post("/generate")
-async def generate(prompt: str, modelName: str) -> Dict[str, Any]:
+async def generate(data: Data) -> Dict[str, Any]:
     start_time = datetime.now()
+    prompt = data.prompt
+    model_name = data.modelName
     try:
-        print(f"Received prompt: {prompt} for model: {modelName}")
+        print(f"Received prompt: {prompt} for model: {model_name}", flush=True)
 
     except HTTPException:
         # pass through expected client errors
@@ -55,3 +62,4 @@ async def generate(prompt: str, modelName: str) -> Dict[str, Any]:
         raise HTTPException(
             status_code=500, detail=f"Internal server error during prediction: {str(e)}"
         )
+    return {"prompt": prompt, "modelName": model_name, "status": "success"}

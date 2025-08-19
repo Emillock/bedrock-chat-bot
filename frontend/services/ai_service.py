@@ -3,10 +3,7 @@ import streamlit as st
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_aws import ChatBedrock
-from langchain_openai import ChatOpenAI
-from langchain_groq import ChatGroq
 from langchain_anthropic import ChatAnthropic
-from langchain_google_genai import ChatGoogleGenerativeAI
 
 from typing import Optional
 from config import MODEL_OPTIONS
@@ -16,13 +13,7 @@ def create_llm_model(llm_provider: str, **kwargs):
     """Create a language model based on the selected provider."""
     params = st.session_state.get('params')
 
-    if llm_provider == "OpenAI":
-        return ChatOpenAI(
-            openai_api_key=params.get("api_key"),
-            model=MODEL_OPTIONS['OpenAI'],
-            temperature=kwargs.get('temperature', 0.7),
-        )
-    elif llm_provider == "Antropic":
+    if llm_provider == "Antropic":
         return ChatAnthropic(
             anthropic_api_key=params.get("api_key"),
             model=MODEL_OPTIONS['Antropic'],
@@ -41,22 +32,6 @@ def create_llm_model(llm_provider: str, **kwargs):
             client=_bedrock,
             model_id=MODEL_OPTIONS['Bedrock'],
             **kwargs
-        )
-
-    elif llm_provider == "Google":
-        return ChatGoogleGenerativeAI(
-            google_api_key=params.get("api_key"),
-            model=MODEL_OPTIONS['Google'],
-            temperature=kwargs.get('temperature', 0.7),
-            max_tokens=kwargs.get('max_tokens', 4096),
-            max_retries=2,
-        )
-    elif llm_provider == "Groq":
-        return ChatGroq(
-            api_key=params.get("api_key"),  # groq_api_key expected here
-            model=MODEL_OPTIONS['Groq'],
-            temperature=kwargs.get("temperature", 0.7),
-            streaming=kwargs.get("streaming", False)
         )
     else:
         raise ValueError(f"Unsupported LLM provider: {llm_provider}")

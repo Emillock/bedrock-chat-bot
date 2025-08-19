@@ -5,6 +5,7 @@ enableCORS=false
 enableXsrfProtection=false 
 enableWebsocketCompression=false
 enableStaticServing = true
+runOnSave = true
 
 [browser] # This ip and port will show in command prompt
 #serverAddress = " "

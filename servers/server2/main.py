@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from mcp.server.fastmcp import FastMCP
 import xml.etree.ElementTree as ET
 
-mcp = FastMCP("Currency Exchange", host="0.0.0.0", port=8001)
 
+mcp = FastMCP("Currency Exchange", host="0.0.0.0", port=8001)
 CBAR_URL = "https://www.cbar.az/currencies"
 
 CURRENCIES = ["USD", "EUR", "RUB", "AZN"]

@@ -17,6 +17,8 @@ services:
   
   mcpserver2:
     build: ./servers/server2
+    networks:
+      - safe_networks
     container_name: mcpserver_2
     restart: always
     volumes:
@@ -24,16 +26,28 @@ services:
     ports:
       - "8001:8001"
 
-  hostclient:
-    build: ./client
-    container_name: hostclient
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    networks:
+      - safe_networks
+    container_name: frontend
+    image: frontend
     restart: always
     volumes:
-      - ./client/:/app
+      - ./frontend:/app
+      - frontend_venv:/app/.venv
     ports:
       - "8501:8501"
-    command: >
-      streamlit run app.py
     depends_on:
-      - mcpserver1
+      - backend
       - mcpserver2
+
+volumes:
+  backend_venv:
+  frontend_venv:
+
+networks:
+  safe_networks:
+    driver: bridge
