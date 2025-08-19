@@ -1,0 +1,39 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    networks:
+      - safe_networks
+    restart: always
+    image: backend
+    container_name: backend
+    volumes:
+      - ./backend:/app
+      # removed for now:
+      - backend_venv:/app/.venv
+    ports:
+      - "8000:8000"
+  
+  mcpserver2:
+    build: ./servers/server2
+    container_name: mcpserver_2
+    restart: always
+    volumes:
+      - ./servers/server2:/app
+    ports:
+      - "8001:8001"
+
+  hostclient:
+    build: ./client
+    container_name: hostclient
+    restart: always
+    volumes:
+      - ./client/:/app
+    ports:
+      - "8501:8501"
+    command: >
+      streamlit run app.py
+    depends_on:
+      - mcpserver1
+      - mcpserver2
