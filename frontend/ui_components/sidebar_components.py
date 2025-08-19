@@ -1,7 +1,6 @@
 import streamlit as st
 from config import MODEL_OPTIONS
 import traceback
-from services.mcp_service import connect_to_mcp_servers
 from services.chat_service import create_chat, delete_chat
 from utils.tool_schema_parser import extract_tool_parameters
 from utils.async_helpers import reset_connection_state
@@ -66,8 +65,11 @@ def create_provider_select_widget():
         key="provider_selection",
         on_change=reset_connection_state
     )
-
-    
+    params['model_id'] = selected_provider
+    params['model_name'] = MODEL_OPTIONS[selected_provider]
+    # Save new provider and its index
+    params['provider_index'] = list(MODEL_OPTIONS.keys()).index(selected_provider)
+       
 
 def create_advanced_configuration_widget():
     params = st.session_state["params"]
@@ -79,65 +81,65 @@ def create_advanced_configuration_widget():
                                     step=512,)
         params['temperature'] = st.slider("Temperature", 0.0, 1.0, step=0.05, value=1.0)
                 
-def create_mcp_connection_widget():
-    with st.sidebar:
-        st.subheader("Server Management")
-        with st.expander(f"MCP Servers ({len(st.session_state.servers)})"):
-            for name, config in st.session_state.servers.items():
-                with st.container(border=True):
-                    st.markdown(f"**Server:** {name}")
-                    st.markdown(f"**URL:** {config['url']}")
-                    if st.button(f"Remove {name}", key=f"remove_{name}"):
-                        del st.session_state.servers[name]
-                        st.rerun()
+# def create_mcp_connection_widget():
+#     with st.sidebar:
+#         st.subheader("Server Management")
+#         with st.expander(f"MCP Servers ({len(st.session_state.servers)})"):
+#             for name, config in st.session_state.servers.items():
+#                 with st.container(border=True):
+#                     st.markdown(f"**Server:** {name}")
+#                     st.markdown(f"**URL:** {config['url']}")
+#                     if st.button(f"Remove {name}", key=f"remove_{name}"):
+#                         del st.session_state.servers[name]
+#                         st.rerun()
 
-        if st.session_state.get("agent"):
-            st.success(f"📶 Connected to {len(st.session_state.servers)} MCP servers!"
-                       f" Found {len(st.session_state.tools)} tools.")
-            if st.button("Disconnect to MCP Servers"):
-                with st.spinner("Connecting to MCP servers..."):
-                    try:
-                        reset_connection_state()
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Error disconnecting to MCP servers: {str(e)}")
-                        st.code(traceback.format_exc(), language="python")
-        else:
-            st.warning("⚠️ Not connected to MCP server")
-            if st.button("Connect to MCP Servers"):
-                with st.spinner("Connecting to MCP servers..."):
-                    try:
-                        connect_to_mcp_servers()
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Error connecting to MCP servers: {str(e)}")
-                        st.code(traceback.format_exc(), language="python")
+#         if st.session_state.get("agent"):
+#             st.success(f"📶 Connected to {len(st.session_state.servers)} MCP servers!"
+#                        f" Found {len(st.session_state.tools)} tools.")
+#             if st.button("Disconnect to MCP Servers"):
+#                 with st.spinner("Connecting to MCP servers..."):
+#                     try:
+#                         reset_connection_state()
+#                         st.rerun()
+#                     except Exception as e:
+#                         st.error(f"Error disconnecting to MCP servers: {str(e)}")
+#                         st.code(traceback.format_exc(), language="python")
+#         else:
+#             st.warning("⚠️ Not connected to MCP server")
+#             if st.button("Connect to MCP Servers"):
+#                 with st.spinner("Connecting to MCP servers..."):
+#                     try:
+#                         connect_to_mcp_servers()
+#                         st.rerun()
+#                     except Exception as e:
+#                         st.error(f"Error connecting to MCP servers: {str(e)}")
+#                         st.code(traceback.format_exc(), language="python")
 
-def create_mcp_tools_widget():
-    with st.sidebar:
-        if st.session_state.tools:
-            st.subheader("🧰 Available Tools")
+# def create_mcp_tools_widget():
+#     with st.sidebar:
+#         if st.session_state.tools:
+#             st.subheader("🧰 Available Tools")
 
-            selected_tool_name = st.selectbox(
-                "Select a Tool",
-                options=[tool.name for tool in st.session_state.tools],
-                index=0
-            )
+#             selected_tool_name = st.selectbox(
+#                 "Select a Tool",
+#                 options=[tool.name for tool in st.session_state.tools],
+#                 index=0
+#             )
 
-            if selected_tool_name:
-                selected_tool = next(
-                    (tool for tool in st.session_state.tools if tool.name == selected_tool_name),
-                    None
-                )
+#             if selected_tool_name:
+#                 selected_tool = next(
+#                     (tool for tool in st.session_state.tools if tool.name == selected_tool_name),
+#                     None
+#                 )
 
-                if selected_tool:
-                    with st.container():
-                        st.write("**Description:**")
-                        st.write(selected_tool.description)
+#                 if selected_tool:
+#                     with st.container():
+#                         st.write("**Description:**")
+#                         st.write(selected_tool.description)
 
-                        parameters = extract_tool_parameters(selected_tool)
+#                         parameters = extract_tool_parameters(selected_tool)
 
-                        if parameters:
-                            st.write("**Parameters:**")
-                            for param in parameters:
-                                st.code(param)
+#                         if parameters:
+#                             st.write("**Parameters:**")
+#                             for param in parameters:
+#                                 st.code(param)

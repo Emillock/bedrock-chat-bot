@@ -5,6 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "boto3>=1.40.12",
+    "dotenv>=0.9.9",
     "fastapi>=0.116.1",
+    "langchain>=0.3.27",
+    "langchain-aws>=0.2.30",
     "uvicorn>=0.35.0",
 ]

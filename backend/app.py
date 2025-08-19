@@ -5,11 +5,14 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict
 from pydantic import BaseModel
+from fastapi.responses import StreamingResponse
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from langchain.schema import BaseMessage
 
 from src.models.predict_model import main as predict_main
+from src.utils import get_response_stream
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -46,7 +49,7 @@ def health() -> Dict[str, Any]:
 
 
 @app.post("/generate")
-async def generate(data: Data) -> Dict[str, Any]:
+async def generate(data: Data):
     start_time = datetime.now()
     prompt = data.prompt
     model_name = data.modelName
@@ -62,4 +65,17 @@ async def generate(data: Data) -> Dict[str, Any]:
         raise HTTPException(
             status_code=500, detail=f"Internal server error during prediction: {str(e)}"
         )
-    return {"prompt": prompt, "modelName": model_name, "status": "success"}
+    
+    def generator():
+        for chunk in get_response_stream(
+            prompt=prompt,
+            model_name=model_name,
+        ):
+            print(f"Yielding chunk: {chunk}", flush=True)
+            yield chunk
+    return StreamingResponse(
+        get_response_stream(
+            prompt=prompt,
+            model_name=model_name,
+        ),
+        media_type="text/event-stream")

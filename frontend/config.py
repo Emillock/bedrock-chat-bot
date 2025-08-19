@@ -7,9 +7,9 @@ env = os.getenv
 
 # Model mapping
 MODEL_OPTIONS = {
-    'Claude 3.5 Haiku': 'us.anthropic.claude-3-5-haiku-20241022-v1:0',
-    'Claude 3.7 Sonnet': 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
-    'Claude 4 Opus': 'us.anthropic.claude-opus-4-20250514-v1:0',
+    'Claude 3 Haiku': 'us.anthropic.claude-3-haiku-20240307-v1:0',
+    'Claude 3 Sonnet': 'us.anthropic.claude-3-sonnet-20240229-v1:0',
+    'Claude 3 Opus': 'us.anthropic.claude-3-opus-20240229-v1:0',
     }
 
 # Streamlit defaults
