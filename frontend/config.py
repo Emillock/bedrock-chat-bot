@@ -13,6 +13,7 @@ MODEL_OPTIONS = {
     "Nova pro": "amazon.nova-pro-v1:0",
 }
 
+# test
 # Load server configuration
 config_path = os.path.join(".", "servers_config.json")
 if os.path.exists(config_path):
