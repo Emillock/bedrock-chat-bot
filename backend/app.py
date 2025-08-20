@@ -1,13 +1,13 @@
 import logging
-import traceback
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 from typing import Any, Dict
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 
-from src.models.predict_model import main as predict_main
+from src.utils import retrieve_and_generate_stream
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -33,6 +33,11 @@ app.add_middleware(
 )
 
 
+class Data(BaseModel):
+    prompt: str
+    modelName: str
+
+
 @app.get("/health")
 def health() -> Dict[str, Any]:
     utc_time = datetime.now(timezone.utc).isoformat()
@@ -41,17 +46,14 @@ def health() -> Dict[str, Any]:
 
 
 @app.post("/generate")
-async def generate(prompt: str, modelName: str) -> Dict[str, Any]:
-    start_time = datetime.now()
-    try:
-        print(f"Received prompt: {prompt} for model: {modelName}")
+async def generate(data: Data):
+    prompt = data.prompt
+    model_name = data.modelName
 
-    except HTTPException:
-        # pass through expected client errors
-        raise
-    except Exception as e:
-        logger.error(f"Unexpected error during prediction: {e}")
-        logger.error(traceback.format_exc())
-        raise HTTPException(
-            status_code=500, detail=f"Internal server error during prediction: {str(e)}"
-        )
+    return StreamingResponse(
+        retrieve_and_generate_stream(
+            model_name=model_name,
+            user_query=prompt,
+        ),
+        media_type="text/event-stream",
+    )

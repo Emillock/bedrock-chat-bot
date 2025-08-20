@@ -1,0 +1,82 @@
+name: CI/CD
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Lint (Ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup uv (+ Python 3.12)
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Ruff check
+        run: uvx ruff check --output-format=github .
+
+  deploy:
+    name: Deploy (Docker Compose on self-hosted)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [ci]
+    runs-on: self-hosted
+    environment: production
+
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Deploy git pull & docker-compose
+        env:
+          DOCKER_BUILDKIT: "0"
+          COMPOSE_DOCKER_CLI_BUILD: "1"
+        run: |
+          set -e
+
+          # prefer repo checked out into the runner workspace
+          if [ -d "${GITHUB_WORKSPACE}/bedrock-chat-bot" ]; then
+            cd "${GITHUB_WORKSPACE}/bedrock-chat-bot"
+          else
+            # fallback path on the EC2 host; adjust if your path differs
+            cd /home/runner/bedrock-chat-bot
+          fi
+
+          # Make sure we are on the latest main
+          git fetch --all
+          git checkout main
+          git reset --hard origin/main
+
+          # sanity checks
+          uname -a || true
+          docker --version
+          (docker compose version || docker-compose --version) || true
+
+          # Optional: pull images first (avoids rebuild when not needed)
+          docker-compose -f docker-compose.yml pull --ignore-pull-failures || true
+
+          # Stop old containers (keep named volumes)
+          docker-compose -f docker-compose.yml down --remove-orphans || true
+
+          # Rebuild and start in background
+          docker-compose -f docker-compose.yml up -d --build
+
+          # Show status
+          docker-compose -f docker-compose.yml ps
+
+      # Optional: prune dangling images to free disk space
+      - name: Prune dangling images (optional)
+        run: docker image prune -f || true
