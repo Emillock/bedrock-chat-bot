@@ -13,18 +13,18 @@ from config import DEFAULT_MAX_TOKENS, DEFAULT_TEMPERATURE
 import traceback
 from config import MODEL_OPTIONS
 
-def request_stream(prompt: str, modelName: str, api_url: str, **kwargs) -> dict | None:
+def request_stream(prompt: str, modelName: str, api_url: str, system: str = None, temperature: float = DEFAULT_TEMPERATURE, max_tokens: int = DEFAULT_MAX_TOKENS):
     """Send the raw uploaded file to FastAPI /predict."""
     try:
-        data={"prompt": prompt, "modelName": modelName}
+        data={"prompt": prompt, "modelName": modelName, "system": system, "temperature": temperature, "maxTokens": max_tokens}
         print(f"Sending request to API: {api_url} with data: {data}", flush=True)
         with requests.post(api_url, json=data, stream=True) as resp:
     # resp.iter_lines() yields chunks as they arrive
-            for line in resp.iter_lines(decode_unicode=True):
-                if line:
+            for line in resp:
+                if line.decode(encoding='utf-8', errors='ignore'):
                     # line is already a string if decode_unicode=True
-                    print(line)
-                    yield line
+                    # print(line)
+                    yield line.decode(encoding='utf-8', errors='ignore')
         # FastAPI: 200 OK on success; 4xx/5xx otherwise with JSON detail
         # if resp.headers.get("content-type", "").startswith("application/json"):
         #     data = resp.json()
@@ -99,6 +99,8 @@ def main():
             # )
             main_prompt = make_main_prompt(user_text)
             try:
+                print("temperature:", st.session_state['params'].get('temperature'), flush=True)
+                print("max_tokens:", st.session_state['params'].get('max_tokens'), flush=True)
                 # If agent is available, use it
                 response_stream = request_stream(
                     prompt=user_text,

@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from langchain.schema import BaseMessage
 
 from src.models.predict_model import main as predict_main
-from src.utils import get_response_stream
+from src.utils import get_response_stream, retrieve_and_generate_stream
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -40,6 +40,9 @@ app.add_middleware(
 class Data(BaseModel):
     prompt: str
     modelName: str
+    system: str
+    temperature: float
+    maxTokens: int
 
 @app.get("/health")
 def health() -> Dict[str, Any]:
@@ -53,8 +56,11 @@ async def generate(data: Data):
     start_time = datetime.now()
     prompt = data.prompt
     model_name = data.modelName
+    system= data.system
+    temperature = data.temperature
+    max_tokens = data.maxTokens
     try:
-        print(f"Received prompt: {prompt} for model: {model_name}", flush=True)
+        print(f"Received prompt: {prompt} for model: {model_name} with temperature {temperature} and max_tokens: {max_tokens}", flush=True)
 
     except HTTPException:
         # pass through expected client errors
@@ -65,17 +71,18 @@ async def generate(data: Data):
         raise HTTPException(
             status_code=500, detail=f"Internal server error during prediction: {str(e)}"
         )
+    for chunk in retrieve_and_generate_stream(
+        model_name=model_name,
+        user_query=prompt,
+    ):
+        print(chunk, flush=True) 
     
-    def generator():
-        for chunk in get_response_stream(
-            prompt=prompt,
-            model_name=model_name,
-        ):
-            print(f"Yielding chunk: {chunk}", flush=True)
-            yield chunk
     return StreamingResponse(
         get_response_stream(
             prompt=prompt,
             model_name=model_name,
+            system=system,
+            temperature=temperature,
+            max_tokens=max_tokens,
         ),
         media_type="text/event-stream")
