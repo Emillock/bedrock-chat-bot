@@ -14,17 +14,6 @@ services:
       - backend_venv:/app/.venv
     ports:
       - "8000:8000"
-  
-  mcpserver2:
-    build: ./servers/server2
-    networks:
-      - safe_networks
-    container_name: mcpserver_2
-    restart: always
-    volumes:
-      - ./servers/server2:/app
-    ports:
-      - "8001:8001"
 
   frontend:
     build:
@@ -42,7 +31,6 @@ services:
       - "8501:8501"
     depends_on:
       - backend
-      - mcpserver2
 
 volumes:
   backend_venv:
