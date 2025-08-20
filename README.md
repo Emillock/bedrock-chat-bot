@@ -14,7 +14,7 @@
 * Create the `.env` file in the `backend/` folder. The `backend/.env.example` contains the template environment file.
 * Add there the AWS access and secret keys with variable names `ACCESS_KEY` and `SECRET_KEY`, respectively.
 
-### 2 · Clone & Run
+### 3 · Clone & Run
 
 ```bash
 git clone https://github.com/your-org/mcp-playground.git
