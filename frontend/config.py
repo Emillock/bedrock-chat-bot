@@ -13,10 +13,6 @@ MODEL_OPTIONS = {
     "Nova pro": "amazon.nova-pro-v1:0",
 }
 
-# Streamlit defaults
-DEFAULT_MAX_TOKENS = 4096
-DEFAULT_TEMPERATURE = 1.0
-
 # Load server configuration
 config_path = os.path.join(".", "servers_config.json")
 if os.path.exists(config_path):
