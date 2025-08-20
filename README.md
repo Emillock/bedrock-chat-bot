@@ -39,13 +39,19 @@ docker compose up --build
    sudo usermod -aG docker ubuntu
    ```
 
-2. **Create GitHub self-hosted runner**
+2. **Add `backend/.env` file to the cloned repository** 
+   ```
+   ACCESS_KEY="access key from aws"
+   SECRET_KEY="secret key from aws"
+   ```
+
+3. **Create GitHub self-hosted runner**
    - Go to your repository **Settings** → **Actions** → **Runners**
    - Click **"New self-hosted runner"** and select **Linux**
    - Follow all the setup steps provided by GitHub **except the last step**
    - Don't run `./run.sh` directly as shown in GitHub instructions
 
-3. **Launch GitHub runner in detached mode**
+4. **Launch GitHub runner in detached mode**
    ```bash
    nohup ./run.sh > runner.log 2>&1 &
    ```
