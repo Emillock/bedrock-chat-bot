@@ -1,9 +1,18 @@
+## Chatbot with Azercell's knowledge base
+## 🖥️🔌 Main Interface
+![Interface](frontend/assets/frontend_main.png)
+
 ## 🚀 Quick Start
 
 ### 1 · Prerequisites
 
 * [Docker ≥ 24](https://docs.docker.com/) & Docker Compose
-* At least one LLM provider key (e.g. `OPENAI_API_KEY`) or AWS creds for Bedrock.
+*  AWS creds for Bedrock.
+
+### 2 · Setup .env
+
+* Create the `.env` file in the `backend/` folder. The `backend/.env.example` contains the template environment file.
+* Add there the AWS access and secret keys with variable names `ACCESS_KEY` and `SECRET_KEY`, respectively.
 
 ### 2 · Clone & Run
 
@@ -16,9 +25,31 @@ docker compose up --build
 | Service | URL | Default Port |
 | ------- | --- | ------------ |
 | Streamlit Client | <http://localhost:8501> | `8501` |
-| Weather MCP | <http://localhost:8000> | `8000` |
-| Currency MCP | <http://localhost:8001> | `8001` |
+| FastAPI Backend | <http://localhost:8000> | `8000` |
+| FastAPI Backend Docs | <http://localhost:8000/docs> | `8000` |
 ---
+
+
+## Development Setup
+
+### For Server Deployment (Ubuntu)
+
+1. **Add user to docker group** (to run docker commands without sudo)
+   ```bash
+   sudo usermod -aG docker ubuntu
+   ```
+
+2. **Create GitHub self-hosted runner**
+   - Go to your repository **Settings** → **Actions** → **Runners**
+   - Click **"New self-hosted runner"** and select **Linux**
+   - Follow all the setup steps provided by GitHub **except the last step**
+   - Don't run `./run.sh` directly as shown in GitHub instructions
+
+3. **Launch GitHub runner in detached mode**
+   ```bash
+   nohup ./run.sh > runner.log 2>&1 &
+   ```
+
 
 ## ⚙️ Configuration
 
@@ -26,17 +57,16 @@ All runtime settings are concentrated in **`client/config.py`** and environment 
 
 | Variable | Purpose |
 | -------- | ------- |
-| `MODEL_ID` | Provider selector (`OpenAI`, `Bedrock`, `Anthropic`, `Google`, `Groq`).
-| `TEMPERATURE` | Sampling temperature (sidebar slider). |
-| `MAX_TOKENS` | Token limit (sidebar). |
+| `MODEL_ID` | Provider selector (`Claude 3 Haiku`, `Claude 3.5 Sonnet`, `Nova pro`).
+
 ```python
 MODEL_OPTIONS = {
-    'OpenAI': 'gpt-4o',
-    'Antropic': 'claude-3-5-sonnet-20240620',
-    'Google': 'gemini-2.0-flash-001',
-    'Bedrock': 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
-    'Groq': 'meta-llama/llama-4-scout-17b-16e-instruct'
+    "Claude 3 Haiku": "anthropic.claude-3-haiku-20240307-v1:0",
+    "Claude 3.5 Sonnet": "anthropic.claude-3-5-sonnet-20240620-v1:0",
+    "Nova pro": "amazon.nova-pro-v1:0",
 }
 ```
-MCP endpoints live in **`servers_config.json`** – edit to add/remove servers without code changes.
 
+## 🙏 Acknowledgements
+
+* [MCP Playground ](https://github.com/Elkhn/mcp-playground)  
