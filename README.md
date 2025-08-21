@@ -17,8 +17,8 @@
 ### 3 · Clone & Run
 
 ```bash
-git clone https://github.com/your-org/mcp-playground.git
-cd mcp-playground
+git clone https://github.com/Emillock/bedrock-chat-bot.git
+cd bedrock-chat-bot
 docker compose up --build
 ```
 
