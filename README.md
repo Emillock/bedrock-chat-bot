@@ -22,11 +22,11 @@ cd mcp-playground
 docker compose up --build
 ```
 
-| Service | URL | Default Port |
-| ------- | --- | ------------ |
-| Streamlit Client | <http://localhost:8501> | `8501` |
-| FastAPI Backend | <http://localhost:8000> | `8000` |
-| FastAPI Backend Docs | <http://localhost:8000/docs> | `8000` |
+| Service | URL | Default Port | EC2 Deployed Link |
+| ------- | --- | ------------ | ------------ |
+| Streamlit Client | <http://localhost:8501> | `8501` | <http://3.212.39.114:8501/> |
+| FastAPI Backend | <http://localhost:8000> | `8000` | <http://3.212.39.114:8000/> |
+| FastAPI Backend Docs | <http://localhost:8000/docs> | `8000` | <http://3.212.39.114:8000/docs> |
 ---
 
 
